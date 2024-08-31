@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animated React To-Do List</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+  <style>
+    @keyframes backgroundAnimation {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes bounceIn {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-10px); }
+      40%, 80% { transform: translateX(10px); }
+    }
+
+    @keyframes pulse {
+      0% { background-color: #a15dff; }
+      50% { background-color: #8a2aff; }
+      100% { background-color: #a15dff; }
+    }
+
+    @keyframes glitterDots {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(0); opacity: 0; }
+    }
+
+    @keyframes glitterStars {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(0); opacity: 0; }
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0); }
+    }
+
+    @keyframes hoverTitle {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+      100% { transform: translateY(0); }
+    }
+
+    @keyframes hoverTodo {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(45deg, #9b59b6, #8e44ad, #d2b4de, #a569bd, #8e44ad);
+      background-size: 300% 300%;
+      animation: backgroundAnimation 15s ease infinite;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .glitter-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .glitter-dots {
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 20%, rgba(150, 0, 255, 0) 60%);
+      background-size: 20px 20px;
+      animation: glitterDots 3s linear infinite;
+    }
+
+    .glitter-stars {
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 10%, rgba(255, 215, 0, 0) 50%);
+      background-size: 40px 40px;
+      animation: glitterStars 3s linear infinite;
+    }
+
+    body.dark {
+      background-color: #333;
+      color: #fff;
+    }
+
+    #root {
+      background-color: white;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+      width: 350px;
+      text-align: center;
+      animation: bounceIn 1s ease;
+      transition: background-color 0.3s, color 0.3s;
+      position: relative;
+      z-index: 1;
+    }
+
+    #root.dark {
+      background-color: #444;
+      color: #fff;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      animation: bounceIn 1s ease, hoverTitle 2s ease-in-out infinite;
+      color: #8e44ad;
+    }
+
+    .todo-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding: 10px;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      transition: background-color 0.3s, transform 0.3s;
+      animation: bounceIn 0.5s ease;
+      cursor: pointer;
+    }
+
+    .todo-item:hover {
+      background-color: #f3e5f5;
+      transform: translateY(-3px);
+      animation: shake 0.5s;
+    }
+
+    .todo-item.hover {
+      animation: hoverTodo 0.5s ease-in-out infinite;
+    }
+
+    .completed {
+      text-decoration: line-through;
+      color: gray;
+    }
+
+    .high-priority {
+      border-left: 6px solid #c62828; /* Dark red */
+    }
+
+    .medium-priority {
+      border-left: 6px solid #f57f17; /* Dark orange */
+    }
+
+    .low-priority {
+      border-left: 6px solid #2e7d32; /* Dark green */
+    }
+
+    button {
+      border: none;
+      background-color: #8e44ad;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      animation: bounceIn 0.5s ease;
+    }
+
+    button:hover {
+      background-color: #6d28d9;
+      transform: scale(1.1);
+      animation: pulse 1s infinite;
+    }
+
+    input[type="text"] {
+      width: calc(100% - 50px);
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      transition: background-color 0.3s, box-shadow 0.3s, border-color 0.3s;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      animation: bounceIn 0.5s ease;
+    }
+
+    input[type="text"]:focus {
+      background-color: #e0b2ff;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+      border-color: #8e44ad;
+    }
+
+    select {
+      margin-bottom: 15px;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      width: 100%;
+      transition: box-shadow 0.3s, border-color 0.3s;
+      animation: bounceIn 0.5s ease;
+    }
+
+    select:focus {
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+      border-color: #8e44ad;
+    }
+
+    .theme-toggle {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+    }
+
+    .progress-bar {
+      background-color: #f4f4f4;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      animation: bounceIn 0.5s ease;
+    }
+
+    .progress {
+      background-color: #8e44ad;
+      height: 10px;
+      width: 0;
+      transition: width 0.3s;
+    }
+
+    .form-glitter {
+      position: relative;
+    }
+
+    .form-glitter::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+            height: 100%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.5) 20%, rgba(150, 0, 255, 0) 60%);
+      background-size: 30px 30px;
+      animation: glitterDots 3s linear infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .form-container {
+      position: relative;
+      z-index: 1;
+    }
+
+    .form-container input,
+    .form-container select {
+      position: relative;
+      z-index: 1;
+    }
+
+    .search-container {
+      margin-bottom: 15px;
+    }
+
+    .search-container input[type="text"] {
+      width: calc(100% - 50px);
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    .search-container input[type="text"]::placeholder {
+      color: #888;
+    }
+
+    .search-container input[type="text"]:focus {
+      outline: none;
+      border-color: #8e44ad;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+  </style>
+</head>
+
+<body>
+  <div id="root">
+    <div class="glitter-overlay glitter-dots"></div>
+    <div class="glitter-overlay glitter-stars"></div>
+    <div class="theme-toggle">
+      <button id="theme-toggle">Toggle Dark/Light Mode</button>
+    </div>
+    <h1 class="animate__animated animate__pulse">To-Do List</h1>
+    <div class="search-container">
+      <input type="text" id="search" placeholder="Search tasks...">
+    </div>
+    <div class="form-container">
+      <input type="text" id="todo-input" placeholder="Add a new task">
+      <select id="priority">
+        <option value="low">Low</option>
+        <option value="medium">Medium</option>
+        <option value="high">High</option>
+      </select>
+      <button id="add-task">Add Task</button>
+      <div class="progress-bar">
+        <div class="progress" id="progress"></div>
+      </div>
+    </div>
+    <ul id="todo-list"></ul>
+  </div>
+
+  <script>
+    const themeToggleButton = document.getElementById('theme-toggle');
+    const root = document.getElementById('root');
+    const todoInput = document.getElementById('todo-input');
+    const prioritySelect = document.getElementById('priority');
+    const addTaskButton = document.getElementById('add-task');
+    const todoList = document.getElementById('todo-list');
+    const progress = document.getElementById('progress');
+    const searchInput = document.getElementById('search');
+
+    let todos = [];
+
+    function updateProgress() {
+      const completedCount = todos.filter(todo => todo.completed).length;
+      const totalCount = todos.length;
+      const progressPercentage = totalCount === 0 ? 0 : (completedCount / totalCount) * 100;
+      progress.style.width = `${progressPercentage}%`;
+    }
+
+    function renderTodos() {
+      todoList.innerHTML = '';
+      todos.forEach((todo, index) => {
+        const li = document.createElement('li');
+        li.classList.add('todo-item');
+        li.classList.add(`${todo.priority}-priority`);
+        if (todo.completed) {
+          li.classList.add('completed');
+        }
+        li.innerHTML = `
+          <span>${todo.text}</span>
+          <button onclick="toggleComplete(${index})">✔️</button>
+          <button onclick="removeTask(${index})">❌</button>
+        `;
+        todoList.appendChild(li);
+      });
+      updateProgress();
+    }
+
+    function addTask() {
+      const text = todoInput.value.trim();
+      const priority = prioritySelect.value;
+      if (text) {
+        todos.push({ text, priority, completed: false });
+        todoInput.value = '';
+        renderTodos();
+      }
+    }
+
+    function removeTask(index) {
+      todos.splice(index, 1);
+      renderTodos();
+    }
+
+    function toggleComplete(index) {
+      todos[index].completed = !todos[index].completed;
+      renderTodos();
+    }
+
+    function filterTodos() {
+      const searchText = searchInput.value.toLowerCase();
+      document.querySelectorAll('.todo-item').forEach(item => {
+        const text = item.querySelector('span').textContent.toLowerCase();
+        item.style.display = text.includes(searchText) ? '' : 'none';
+      });
+    }
+
+    themeToggleButton.addEventListener('click', () => {
+      root.classList.toggle('dark');
+    });
+
+    addTaskButton.addEventListener('click', addTask);
+
+    searchInput.addEventListener('input', filterTodos);
+  </script>
+</body>
+
+  </html>
